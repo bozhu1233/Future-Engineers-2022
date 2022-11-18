@@ -1,0 +1,390 @@
+Qualification Round
+from spike import PrimeHub, LightMatrix, Button, StatusLight, ForceSensor, MotionSensor, Speaker, ColorSensor, App, DistanceSensor, Motor, MotorPair
+from spike.control import wait_for_seconds, wait_until, Timer
+from math import *
+from utime import sleep_ms
+import hub
+import utime
+from utime import sleep_ms
+from hub import port
+ 
+#initialising all sensors, motors and starting serial communication.
+brick = PrimeHub()
+brick.light_matrix.show_image('SAD')                                                                                                                                                                                                                                 
+Movement = Motor('A')
+Steer = Motor('D')
+Color_Sensor = ColorSensor('C')
+Movement.set_degrees_counted(0)
+Steer.set_degrees_counted(0)
+Movement.set_default_speed(-100) 
+Steer.set_default_speed(100)
+Steer.run_to_position(0)
+angle = angle1 = 69
+ 
+brick.motion_sensor.reset_yaw_angle()
+port.B.mode(port.MODE_FULL_DUPLEX)
+uart = hub.port.B
+uart.mode(1)
+utime.sleep_ms(1000)
+uart.baud(115200)
+usb = hub.USB_VCP(0)
+usb.setinterrupt(-1)
+ 
+#Return yaw angle between (0,360)
+def oof():
+   if brick.motion_sensor.get_yaw_angle() > 0:
+       return (brick.motion_sensor.get_yaw_angle())
+   else:
+       return (360 - abs(brick.motion_sensor.get_yaw_angle()))
+#Return orange or blue based on the colour sensor r,g,b and overall value.
+def detect_color():
+   tuple_color = Color_Sensor.get_rgb_intensity()
+   #print(tuple_color)
+   overall = tuple_color[3]
+   color = list(tuple_color)
+   color.remove(tuple_color[3])
+   highest = color.index(max(color))
+   if overall in range(400,800) and highest == 0:
+       return('orange')
+       print('orange')
+   elif overall in range(200,600) and highest == 2:
+       return ('blue')
+ 
+ 
+turn = 0
+i = 0
+Movement.start()
+#Start of run with zero sections ran through.
+while i != 12:
+ 
+
+ 
+#When an orange line or blue line is detected, arduino ultrasonic will check for the distance < 45cm to turn. Once it turns it steers the wheels to a position until the assigned angle with the yaw angle is reached..
+ 
+
+ 
+   if detect_color() == 'orange':
+       print('ORANGE')
+       while turn != True:
+           try:
+               data = uart.read(8).decode('utf8').rstrip()
+               if data:
+                   usb.write(data)
+                   #print(data)
+                   if data == 'turn':
+                       turn = True
+                       Steer.run_to_position(90)
+                       print('turn')
+                       break
+                   else:
+                       turn = False
+           except UnicodeError:
+               pass
+      
+       turn = False
+       while True:
+#Correction Steering. If the robot is steering towards the inner wall or outer it will adjust accordingly.
+           if oof() >= angle:
+               Steer.run_to_position(0)
+               old_oof = oof()
+               print(oof())
+               wait_for_seconds(0.2)
+               if oof() > old_oof - 15:
+                   Steer.run_to_position(6, speed = 100)  
+                   print('here')
+               elif oof() < old_oof + 15:
+                   Steer.run_to_position(354, speed = 100)  
+                   print('over')
+               elif oof() in range((old_oof - 15), (old_oof + 15)):
+                   Steer.run_to_position(0)
+               angle += 90
+           else:
+               continue
+           if angle >= 360:
+               angle = angle1
+           break
+      
+       i += 1
+   elif detect_color() == 'blue':
+       print('BLUE')
+       while turn != True:
+           try:
+               data = uart.read(8).decode('utf8').rstrip()
+               if data:
+                   usb.write(data)
+                   #print(data)
+                   if data == 'turn':
+                       turn = True
+                       Steer.run_to_position(270)
+                       print('turn')
+                       break
+                   else:
+                       turn = False
+           except UnicodeError:
+               pass
+      
+       turn = False
+       while True:
+           if oof() <= (360 - angle):
+               Steer.run_to_position(0)
+               old_oof = oof()
+               print(oof())
+               wait_for_seconds(0.2)
+               if oof() > old_oof + 15:
+                   Steer.run_to_position(355, speed = 100)  
+                  
+                   print('here')
+               elif oof() < old_oof - 15:
+                   Steer.run_to_position(5, speed = 100)  
+                   print('over')
+               elif oof() in range((old_oof - 15), (old_oof + 15)):
+                   Steer.run_to_position(0)
+               angle += 90
+           else:
+               continue
+           if angle >= 360:
+               angle = angle1
+           break
+       i += 1
+#After 12th section move into starting zone and stop.
+wait_for_seconds(0.6)
+Movement.stop()
+ 
+ 
+ 
+ 
+Final Run
+#initialising all sensors, motors and starting serial communication.
+from utime import sleep_ms
+from hub import port
+import hub
+import utime
+from spike import PrimeHub, LightMatrix, Button, StatusLight, ForceSensor, MotionSensor, Speaker, ColorSensor, App, DistanceSensor, Motor, MotorPair
+from spike.control import wait_for_seconds, wait_until, Timer
+from math import *
+ 
+brick = PrimeHub()
+brick.light_matrix.show_image('SAD')
+Movement = Motor('A')
+Steer = Motor('D')
+Color_Sensor = ColorSensor('C')
+ 
+Movement.set_degrees_counted(0)
+Steer.set_degrees_counted(0)
+Movement.set_default_speed(-60)
+Steer.set_default_speed(100)
+Steer.run_to_position(0)
+ 
+port.B.mode(port.MODE_FULL_DUPLEX)
+uart = hub.port.B
+uart.mode(1)
+utime.sleep_ms(1000)
+uart.baud(115200)
+usb = hub.USB_VCP(0)
+usb.setinterrupt(-1)
+angle = angle1 = 80
+brick.motion_sensor.reset_yaw_angle()
+ 
+def oof():
+   if brick.motion_sensor.get_yaw_angle() > 0:
+       return (brick.motion_sensor.get_yaw_angle())
+   else:
+       return (360 - abs(brick.motion_sensor.get_yaw_angle()))
+ 
+def detect_color():
+   tuple_color = Color_Sensor.get_rgb_intensity()
+   #print(tuple_color)
+   overall = tuple_color[3]
+   color = list(tuple_color)
+   color.remove(tuple_color[3])
+   highest = color.index(max(color))
+   if overall in range(400,800) and highest == 0:
+       return ('orange')
+   elif overall in range(200,600) and highest == 2:
+       return('blue')
+ 
+red = 0 
+green = 0
+turn = 0
+i = 0
+data = 0
+colour = 0
+Movement.start()
+while i != 12:
+#While no lines are detected, look for red and green blocks. If one block is detected it is stored into a red/green variable. Therefore it will only avoid each block once.
+ 
+   while detect_color() != 'orange' or detect_color() != 'blue':
+           try:
+               data = uart.read(8).decode('utf8').rstrip()
+               if data:
+                   if data == 'red' and red != 1 :
+                       print('red')
+                       Steer.run_to_position(50, speed = 20)  
+                       Steer.run_to_position(310, speed = 40)
+                       wait_for_seconds(0.1)
+                       Steer.run_to_position(30, speed = 100)
+                       red = 1
+                   elif data == 'green' and green != 1:
+                       print('green')
+                       Steer.run_to_position(310, speed = 20)  
+                       Steer.run_to_position(50, speed = 40)
+                       wait_for_seconds(0.1)
+                       Steer.run_to_position(330, speed = 100)
+                       green = 1
+                   Steer.run_to_position(0)
+                   if detect_colour == 'orange':
+                       colour = 'orange'
+                   elif detect_color() == 'blue':
+                       colour = 'blue'
+           except UnicodeError:
+               pass
+   print('exit')
+#If the orange/blue line is detected, the robot will turn until the ultrasonic distance is < 60cm and turn until the yaw angle is reached.
+   if colour == 'orange':
+       print('ORANGE')
+       while turn != True:
+           try:
+               data = uart.read(8).decode('utf8').rstrip()
+               if data:
+                   usb.write(data)
+                   if data == 'turn':
+                       turn = True
+                       Steer.run_to_position(100)
+                       print('turn')
+                       break
+                   else:
+                       turn = False
+           except UnicodeError:
+               pass
+       turn = False
+       colour = 0
+       red = 0
+       green = 0
+       while True:
+          #Correction code
+           if oof() >= angle:
+               Steer.run_to_position(0)
+               old_oof = oof()
+               wait_for_seconds(0.2)
+               if oof() < old_oof:
+                   Steer.run_to_position(5)
+                   print('here')
+               else:
+                   Steer.run_to_position(0)
+                   print('over')
+               angle += 90
+           else:
+               continue
+           if angle >= 360:
+               angle = angle1
+           break
+       i += 1
+  
+wait_for_seconds(1)
+Movement.stop()
+ 
+ 
+ 
+ 
+ 
+//Qualificatino Round Arduino Code
+#include <HCSR04.h>
+byte triggerPin = 4;
+byte echoPin = 3;
+ 
+void setup () {
+ Serial.begin(115200);
+ HCSR04.begin(triggerPin, echoPin);
+}
+ 
+void loop ()
+{
+//if ultrasonic is close to wall print turn.
+ double* distances = HCSR04.measureDistanceCm();
+if (distances[0] <= 45 and distances[0] != -1.00)
+     {
+       Serial.println("turn");
+       }
+}
+ 
+ 
+          
+          
+ 
+ 
+          
+          
+ 
+ 
+          
+ 
+//Final Run Arduino Code
+#include <HCSR04.h>
+#include <Pixy2.h>
+Pixy2 pixy;
+byte triggerPin = 4;
+byte echoPin = 3;
+//intialise the camera, turn on led and activate ultrasonic.
+void setup () {
+ Serial.begin(115200);
+ pixy.init();
+ HCSR04.begin(triggerPin, echoPin);
+ pixy.setLamp(1,1);
+}
+void loop () {
+ double* distances = HCSR04.measureDistanceCm();
+ 
+//if blocks are detect only print red/green if the blocks are in a certain range.
+ int i;
+ pixy.ccc.getBlocks();
+ if (pixy.ccc.numBlocks)
+ {
+   for (i=0; i<pixy.ccc.numBlocks; i++)
+   {
+     if (pixy.ccc.blocks[i].m_y > 70)
+    
+     {
+  
+        if (pixy.ccc.blocks[i].m_signature == 4)
+        {
+ 
+        if (pixy.ccc.blocks[i].m_x <260 and pixy.ccc.blocks[i].m_x > 40)
+     {
+    
+       Serial.println("green");
+     
+       }
+     }
+     else if (pixy.ccc.blocks[i].m_signature == 5)
+     {
+     if (pixy.ccc.blocks[i].m_x <240 and pixy.ccc.blocks[i].m_x > 50)
+     {
+     {
+       Serial.println("red");
+       }
+ 
+ }
+ }
+     }
+   }
+ }
+#If no blocks are detected print turn when the robot is close to the wall.
+else {
+if (distances[0] <= 50 and distances[0] != -1.00)
+     {
+       Serial.println("turn");
+       delay(100);
+       }
+}
+}
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
