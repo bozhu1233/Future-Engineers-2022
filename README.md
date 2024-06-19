@@ -15,3 +15,4 @@ For our second round we now have to bring the camera into play we start of the s
 
 After all, we had a lot of fun with this competition and have put in a lot of blood and sweat. We are very proud of how far we have come and this competition has brought us a lot closer with all the hours we have spent together. Sometimes upset and sometimes happy but at the end of the day we knew we had to keep pushing and it will all be worth it in the end. We are very grateful to have been able to participate in this competition.
 
+Global Ranking: https://scoring.wro-association.org/en/event/scoring/29/wro-international-final-2022-germany
